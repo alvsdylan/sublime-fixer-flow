@@ -62,7 +62,7 @@ import {
   PROD_STATUS_COLOR,
 } from "@/lib/production-types";
 
-export const Route = createFileRoute("/producao")({
+export const Route = createFileRoute("/_authenticated/producao")({
   head: () => ({
     meta: [
       { title: "Controle de Produção" },

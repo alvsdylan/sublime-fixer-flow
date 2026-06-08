@@ -13,7 +13,7 @@ import { CardEditor } from "@/components/kanban/card-editor";
 import type { RepairCard, RepairStatus } from "@/lib/repair-types";
 import { STATUS_ORDER } from "@/lib/repair-types";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
       { title: "Consertos de Sublimação" },
