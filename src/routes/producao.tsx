@@ -207,12 +207,21 @@ function ProductionPage() {
               className="pl-8 h-9"
             />
           </div>
-          {search && (
+          <Input
+            type="date"
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+            className="h-9 w-[160px]"
+          />
+          {(search || dateFilter) && (
             <Button
               variant="ghost"
               size="icon"
               className="h-9 w-9"
-              onClick={() => setSearch("")}
+              onClick={() => {
+                setSearch("");
+                setDateFilter("");
+              }}
             >
               <X className="h-4 w-4" />
             </Button>
