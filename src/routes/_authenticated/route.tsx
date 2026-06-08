@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Loader2 } from "lucide-react";
+import { AppSidebar } from "@/components/app-sidebar";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -39,5 +40,12 @@ function AuthenticatedLayout() {
     );
   }
 
-  return <Outlet />;
+  return (
+    <div className="flex h-screen w-full">
+      <AppSidebar />
+      <div className="flex-1 min-w-0 flex flex-col">
+        <Outlet />
+      </div>
+    </div>
+  );
 }
