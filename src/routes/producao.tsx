@@ -120,13 +120,20 @@ function ProductionPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return orders;
-    return orders.filter(
-      (o) =>
-        o.client_name.toLowerCase().includes(q) ||
-        o.order_number.toLowerCase().includes(q),
-    );
-  }, [orders, search]);
+    return orders.filter((o) => {
+      if (q) {
+        const hit =
+          o.client_name.toLowerCase().includes(q) ||
+          o.order_number.toLowerCase().includes(q);
+        if (!hit) return false;
+      }
+      if (dateFilter) {
+        const d = new Date(o.created_at).toISOString().slice(0, 10);
+        if (d !== dateFilter) return false;
+      }
+      return true;
+    });
+  }, [orders, search, dateFilter]);
 
   const byStatus = useMemo(() => {
     const m: Record<ProductionStatus, ProductionOrder[]> = {
