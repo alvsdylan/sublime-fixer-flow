@@ -92,7 +92,7 @@ export const updateUser = createServerFn({ method: "POST" })
     if (data.active !== undefined) profilePatch.active = data.active;
 
     if (Object.keys(profilePatch).length > 0) {
-      const { error } = await supabaseAdmin.from("profiles").update(profilePatch).eq("id", data.id);
+      const { error } = await supabaseAdmin.from("profiles").update(profilePatch as any).eq("id", data.id);
       if (error) throw new Error(error.message);
     }
 

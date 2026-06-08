@@ -24,7 +24,7 @@ export async function logAudit(
       module,
       action,
       target: target ?? null,
-      details: details ?? null,
+      details: (details ?? null) as any,
     });
   } catch (e) {
     console.warn("audit failed", e);
