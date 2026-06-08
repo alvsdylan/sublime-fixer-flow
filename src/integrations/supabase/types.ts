@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          module: string
+          target: string | null
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          module: string
+          target?: string | null
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          module?: string
+          target?: string | null
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: []
+      }
       production_order_history: {
         Row: {
           changed_at: string
@@ -76,6 +109,39 @@ export type Database = {
           position?: number
           status?: Database["public"]["Enums"]["production_status"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string
+          id: string
+          name: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email: string
+          id: string
+          name?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          username?: string
         }
         Relationships: []
       }
@@ -161,11 +227,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      current_username: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["user_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       production_status: "molde" | "impresso" | "calandra"
       repair_status: "todo" | "in_progress" | "corrected" | "finished"
+      user_role: "admin" | "common"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -295,6 +370,7 @@ export const Constants = {
     Enums: {
       production_status: ["molde", "impresso", "calandra"],
       repair_status: ["todo", "in_progress", "corrected", "finished"],
+      user_role: ["admin", "common"],
     },
   },
 } as const
