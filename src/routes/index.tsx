@@ -157,23 +157,23 @@ function KanbanPage() {
       </header>
 
       <main className="flex-1 overflow-x-auto overflow-y-hidden p-4">
-        <div className="flex gap-4 h-full">
-          {STATUS_ORDER.map((s) => (
-            <KanbanColumn
-              key={s}
-              status={s}
-              cards={byStatus[s]}
-              onAdd={openNew}
-              onEdit={openEdit}
-              onDelete={setDeleteTarget}
-              onViewImage={setPreviewImage}
-            />
-          ))}
-        </div>
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          <div className="flex gap-4 h-full">
+            {STATUS_ORDER.map((s) => (
+              <KanbanColumn
+                key={s}
+                status={s}
+                cards={byStatus[s]}
+                onAdd={openNew}
+                onEdit={openEdit}
+                onDelete={setDeleteTarget}
+                onViewImage={setPreviewImage}
+              />
+            ))}
+          </div>
+        </DndContext>
         {loading && <p className="text-center text-sm text-muted-foreground mt-4">Carregando…</p>}
       </main>
-
-      <DndProviderWrapper sensors={sensors} onDragEnd={handleDragEnd} />
 
       <CardEditor
         open={editorOpen}
@@ -210,8 +210,4 @@ function KanbanPage() {
     </div>
   );
 
-  // Wrapper because hooks order — we'll inline DnDContext instead. Actually let's restructure:
 }
-
-// Wrap children with DndContext via a portal-like trick:
-function DndProviderWrapper(_: any) { return null; }
