@@ -79,6 +79,7 @@ function ProductionPage() {
   const [orders, setOrders] = useState<ProductionOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
   const [editorOpen, setEditorOpen] = useState(false);
   const [defaultStatus, setDefaultStatus] = useState<ProductionStatus>("molde");
   const [detail, setDetail] = useState<ProductionOrder | null>(null);
@@ -119,13 +120,20 @@ function ProductionPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return orders;
-    return orders.filter(
-      (o) =>
-        o.client_name.toLowerCase().includes(q) ||
-        o.order_number.toLowerCase().includes(q),
-    );
-  }, [orders, search]);
+    return orders.filter((o) => {
+      if (q) {
+        const hit =
+          o.client_name.toLowerCase().includes(q) ||
+          o.order_number.toLowerCase().includes(q);
+        if (!hit) return false;
+      }
+      if (dateFilter) {
+        const d = new Date(o.created_at).toISOString().slice(0, 10);
+        if (d !== dateFilter) return false;
+      }
+      return true;
+    });
+  }, [orders, search, dateFilter]);
 
   const byStatus = useMemo(() => {
     const m: Record<ProductionStatus, ProductionOrder[]> = {
@@ -199,12 +207,21 @@ function ProductionPage() {
               className="pl-8 h-9"
             />
           </div>
-          {search && (
+          <Input
+            type="date"
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+            className="h-9 w-[160px]"
+          />
+          {(search || dateFilter) && (
             <Button
               variant="ghost"
               size="icon"
               className="h-9 w-9"
-              onClick={() => setSearch("")}
+              onClick={() => {
+                setSearch("");
+                setDateFilter("");
+              }}
             >
               <X className="h-4 w-4" />
             </Button>
