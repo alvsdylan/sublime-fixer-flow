@@ -79,6 +79,7 @@ function ProductionPage() {
   const [orders, setOrders] = useState<ProductionOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
   const [editorOpen, setEditorOpen] = useState(false);
   const [defaultStatus, setDefaultStatus] = useState<ProductionStatus>("molde");
   const [detail, setDetail] = useState<ProductionOrder | null>(null);
