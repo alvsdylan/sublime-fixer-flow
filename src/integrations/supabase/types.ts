@@ -14,7 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      repair_card_history: {
+        Row: {
+          card_id: string
+          changed_at: string
+          from_status: Database["public"]["Enums"]["repair_status"] | null
+          id: string
+          to_status: Database["public"]["Enums"]["repair_status"]
+        }
+        Insert: {
+          card_id: string
+          changed_at?: string
+          from_status?: Database["public"]["Enums"]["repair_status"] | null
+          id?: string
+          to_status: Database["public"]["Enums"]["repair_status"]
+        }
+        Update: {
+          card_id?: string
+          changed_at?: string
+          from_status?: Database["public"]["Enums"]["repair_status"] | null
+          id?: string
+          to_status?: Database["public"]["Enums"]["repair_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repair_card_history_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "repair_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      repair_cards: {
+        Row: {
+          art_link: string | null
+          attendant_name: string
+          client_name: string
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          order_number: string
+          position: number
+          request_date: string
+          status: Database["public"]["Enums"]["repair_status"]
+          updated_at: string
+        }
+        Insert: {
+          art_link?: string | null
+          attendant_name: string
+          client_name: string
+          created_at?: string
+          description: string
+          id?: string
+          image_url?: string | null
+          order_number: string
+          position?: number
+          request_date?: string
+          status?: Database["public"]["Enums"]["repair_status"]
+          updated_at?: string
+        }
+        Update: {
+          art_link?: string | null
+          attendant_name?: string
+          client_name?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          order_number?: string
+          position?: number
+          request_date?: string
+          status?: Database["public"]["Enums"]["repair_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +99,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      repair_status: "todo" | "in_progress" | "corrected" | "finished"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +226,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      repair_status: ["todo", "in_progress", "corrected", "finished"],
+    },
   },
 } as const
