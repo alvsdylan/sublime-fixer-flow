@@ -34,6 +34,9 @@
   --color-col-progress: var(--col-progress);
   --color-col-corrected: var(--col-corrected);
   --color-col-finished: var(--col-finished);
+  --color-col-molde: var(--col-molde);
+  --color-col-impresso: var(--col-impresso);
+  --color-col-calandra: var(--col-calandra);
 }
 
 :root {
