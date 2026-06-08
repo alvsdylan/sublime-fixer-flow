@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { AppSidebar } from "../components/app-sidebar";
 
 function NotFoundComponent() {
   return (
@@ -122,8 +123,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <div className="flex h-screen w-full">
+        <AppSidebar />
+        <div className="flex-1 min-w-0 flex flex-col">
+          <Outlet />
+        </div>
+      </div>
     </QueryClientProvider>
   );
 }

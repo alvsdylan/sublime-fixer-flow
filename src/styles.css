@@ -34,6 +34,9 @@
   --color-col-progress: var(--col-progress);
   --color-col-corrected: var(--col-corrected);
   --color-col-finished: var(--col-finished);
+  --color-col-molde: var(--col-molde);
+  --color-col-impresso: var(--col-impresso);
+  --color-col-calandra: var(--col-calandra);
 }
 
 :root {
@@ -65,6 +68,10 @@
   --col-progress: oklch(0.70 0.16 80);    /* amber */
   --col-corrected: oklch(0.60 0.16 200);  /* sky */
   --col-finished: oklch(0.60 0.15 150);   /* green */
+
+  --col-molde: oklch(0.65 0.18 30);       /* warm red/orange */
+  --col-impresso: oklch(0.70 0.16 80);    /* amber */
+  --col-calandra: oklch(0.60 0.15 150);   /* green */
 }
 
 @layer base {
