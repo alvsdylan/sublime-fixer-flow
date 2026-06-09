@@ -89,11 +89,13 @@ function ProductionPage() {
   const [orders, setOrders] = useState<ProductionOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [clientFilter, setClientFilter] = useState("");
-  const [orderFilter, setOrderFilter] = useState("");
-  const [fabricFilter, setFabricFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState(() => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  });
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<ProductionOrder | null>(null);
