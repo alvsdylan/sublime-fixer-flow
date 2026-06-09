@@ -19,8 +19,13 @@ import {
   Calendar,
   Clock,
   Trash2,
+  Pencil,
+  Eye,
   History as HistoryIcon,
   Loader2,
+  User as UserIcon,
+  Shirt,
+  Palette,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,7 +58,7 @@ import { Toaster, toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type {
   ProductionOrder,
-  ProductionHistory,
+  ProductionAuditEntry,
   ProductionStatus,
 } from "@/lib/production-types";
 import {
@@ -75,12 +80,23 @@ export const Route = createFileRoute("/_authenticated/producao")({
   component: ProductionPage,
 });
 
+const FABRIC_SUGGESTIONS = ["Dry Fit", "PV", "Helanca", "Poliéster", "Tactel", "Algodão", "Outro"];
+const COLOR_SUGGESTIONS = ["RGB", "CMYK", "Pantone", "Sublimação", "Outro"];
+
+type StatusFilter = ProductionStatus | "all";
+
 function ProductionPage() {
   const [orders, setOrders] = useState<ProductionOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [clientFilter, setClientFilter] = useState("");
+  const [orderFilter, setOrderFilter] = useState("");
+  const [fabricFilter, setFabricFilter] = useState("");
+
   const [editorOpen, setEditorOpen] = useState(false);
+  const [editing, setEditing] = useState<ProductionOrder | null>(null);
   const [defaultStatus, setDefaultStatus] = useState<ProductionStatus>("molde");
   const [detail, setDetail] = useState<ProductionOrder | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ProductionOrder | null>(null);
@@ -120,20 +136,28 @@ function ProductionPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
+    const c = clientFilter.trim().toLowerCase();
+    const n = orderFilter.trim().toLowerCase();
+    const f = fabricFilter.trim().toLowerCase();
     return orders.filter((o) => {
       if (q) {
         const hit =
           o.client_name.toLowerCase().includes(q) ||
-          o.order_number.toLowerCase().includes(q);
+          o.order_number.toLowerCase().includes(q) ||
+          (o.fabric ?? "").toLowerCase().includes(q);
         if (!hit) return false;
       }
+      if (statusFilter !== "all" && o.status !== statusFilter) return false;
+      if (c && !o.client_name.toLowerCase().includes(c)) return false;
+      if (n && !o.order_number.toLowerCase().includes(n)) return false;
+      if (f && !(o.fabric ?? "").toLowerCase().includes(f)) return false;
       if (dateFilter) {
         const d = new Date(o.created_at).toISOString().slice(0, 10);
         if (d !== dateFilter) return false;
       }
       return true;
     });
-  }, [orders, search, dateFilter]);
+  }, [orders, search, statusFilter, clientFilter, orderFilter, fabricFilter, dateFilter]);
 
   const byStatus = useMemo(() => {
     const m: Record<ProductionStatus, ProductionOrder[]> = {
@@ -166,7 +190,13 @@ function ProductionPage() {
   }
 
   function openNew(status: ProductionStatus) {
+    setEditing(null);
     setDefaultStatus(status);
+    setEditorOpen(true);
+  }
+
+  function openEdit(o: ProductionOrder) {
+    setEditing(o);
     setEditorOpen(true);
   }
 
@@ -185,50 +215,91 @@ function ProductionPage() {
     setDeleteTarget(null);
   }
 
+  const hasFilters =
+    !!search || !!dateFilter || statusFilter !== "all" || !!clientFilter || !!orderFilter || !!fabricFilter;
+
   return (
     <div className="flex flex-col h-screen">
       <Toaster richColors position="top-right" />
 
-      <header className="border-b border-border bg-card/80 backdrop-blur px-4 sm:px-6 py-3 flex flex-wrap items-center gap-3">
-        <div>
-          <h1 className="text-base font-bold leading-tight">Controle de Produção</h1>
-          <p className="text-[11px] text-muted-foreground leading-tight">
-            Acompanhamento de pedidos em produção
-          </p>
+      <header className="border-b border-border bg-card/80 backdrop-blur px-4 sm:px-6 py-3 space-y-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <div>
+            <h1 className="text-base font-bold leading-tight">Controle de Produção</h1>
+            <p className="text-[11px] text-muted-foreground leading-tight">
+              Acompanhamento de pedidos em produção
+            </p>
+          </div>
+
+          <div className="flex-1 flex flex-wrap items-center gap-2 sm:justify-end">
+            <div className="relative flex-1 sm:max-w-xs min-w-[180px]">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar cliente, pedido ou tecido…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-8 h-9"
+              />
+            </div>
+            <Button onClick={() => openNew("molde")} className="h-9">
+              <Plus className="h-4 w-4 mr-1" /> Adicionar Pedido
+            </Button>
+          </div>
         </div>
 
-        <div className="flex-1 flex flex-wrap items-center gap-2 sm:justify-end">
-          <div className="relative flex-1 sm:max-w-xs min-w-[180px]">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar cliente ou pedido…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 h-9"
-            />
-          </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
+            <SelectTrigger className="h-8 w-[140px] text-xs">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos status</SelectItem>
+              {PROD_STATUS_ORDER.map((s) => (
+                <SelectItem key={s} value={s}>{PROD_STATUS_LABELS[s]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Input
+            placeholder="Cliente"
+            value={clientFilter}
+            onChange={(e) => setClientFilter(e.target.value)}
+            className="h-8 w-[140px] text-xs"
+          />
+          <Input
+            placeholder="Nº pedido"
+            value={orderFilter}
+            onChange={(e) => setOrderFilter(e.target.value)}
+            className="h-8 w-[120px] text-xs"
+          />
+          <Input
+            placeholder="Tecido"
+            value={fabricFilter}
+            onChange={(e) => setFabricFilter(e.target.value)}
+            className="h-8 w-[120px] text-xs"
+          />
           <Input
             type="date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="h-9 w-[160px]"
+            className="h-8 w-[150px] text-xs"
           />
-          {(search || dateFilter) && (
+          {hasFilters && (
             <Button
               variant="ghost"
-              size="icon"
-              className="h-9 w-9"
+              size="sm"
+              className="h-8"
               onClick={() => {
                 setSearch("");
                 setDateFilter("");
+                setStatusFilter("all");
+                setClientFilter("");
+                setOrderFilter("");
+                setFabricFilter("");
               }}
             >
-              <X className="h-4 w-4" />
+              <X className="h-3 w-3 mr-1" /> Limpar
             </Button>
           )}
-          <Button onClick={() => openNew("molde")} className="h-9">
-            <Plus className="h-4 w-4 mr-1" /> Adicionar Pedido
-          </Button>
         </div>
       </header>
 
@@ -242,6 +313,7 @@ function ProductionPage() {
                 orders={byStatus[s]}
                 onAdd={openNew}
                 onOpen={setDetail}
+                onEdit={openEdit}
                 onDelete={setDeleteTarget}
               />
             ))}
@@ -258,12 +330,17 @@ function ProductionPage() {
         open={editorOpen}
         onOpenChange={setEditorOpen}
         defaultStatus={defaultStatus}
+        order={editing}
         onSaved={load}
       />
 
       <OrderDetail
         order={detail}
         onClose={() => setDetail(null)}
+        onEdit={(o) => {
+          setDetail(null);
+          openEdit(o);
+        }}
         onDelete={(o) => setDeleteTarget(o)}
       />
 
@@ -296,12 +373,14 @@ function ProductionColumn({
   orders,
   onAdd,
   onOpen,
+  onEdit,
   onDelete,
 }: {
   status: ProductionStatus;
   orders: ProductionOrder[];
   onAdd: (s: ProductionStatus) => void;
   onOpen: (o: ProductionOrder) => void;
+  onEdit: (o: ProductionOrder) => void;
   onDelete: (o: ProductionOrder) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
@@ -341,6 +420,7 @@ function ProductionColumn({
             key={o.id}
             order={o}
             onOpen={onOpen}
+            onEdit={onEdit}
             onDelete={onDelete}
           />
         ))}
@@ -359,10 +439,12 @@ function ProductionColumn({
 function ProductionCard({
   order,
   onOpen,
+  onEdit,
   onDelete,
 }: {
   order: ProductionOrder;
   onOpen: (o: ProductionOrder) => void;
+  onEdit: (o: ProductionOrder) => void;
   onDelete: (o: ProductionOrder) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
@@ -391,7 +473,6 @@ function ProductionCard({
         {...attributes}
         {...listeners}
         className="cursor-grab active:cursor-grabbing"
-        onClick={() => onOpen(order)}
       >
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-sm leading-tight">
@@ -401,6 +482,21 @@ function ProductionCard({
             <Hash className="h-2.5 w-2.5" /> {order.order_number}
           </span>
         </div>
+
+        {(order.fabric || order.color_profile) && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {order.fabric && (
+              <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded inline-flex items-center gap-1">
+                <Shirt className="h-2.5 w-2.5" /> {order.fabric}
+              </span>
+            )}
+            {order.color_profile && (
+              <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded inline-flex items-center gap-1">
+                <Palette className="h-2.5 w-2.5" /> {order.color_profile}
+              </span>
+            )}
+          </div>
+        )}
 
         <div className="flex items-center justify-between mt-2 text-[11px] text-muted-foreground">
           <span className="inline-flex items-center gap-1">
@@ -432,7 +528,34 @@ function ProductionCard({
         <Button
           size="icon"
           variant="ghost"
+          className="h-7 w-7"
+          title="Visualizar"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpen(order);
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <Eye className="h-3 w-3" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7"
+          title="Editar"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(order);
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <Pencil className="h-3 w-3" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
           className="h-7 w-7 text-destructive hover:text-destructive"
+          title="Excluir"
           onClick={(e) => {
             e.stopPropagation();
             onDelete(order);
@@ -452,27 +575,33 @@ function OrderEditor({
   open,
   onOpenChange,
   defaultStatus,
+  order,
   onSaved,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   defaultStatus: ProductionStatus;
+  order: ProductionOrder | null;
   onSaved: () => void;
 }) {
   const [clientName, setClientName] = useState("");
   const [orderNumber, setOrderNumber] = useState("");
   const [artLink, setArtLink] = useState("");
+  const [fabric, setFabric] = useState("");
+  const [colorProfile, setColorProfile] = useState("");
   const [status, setStatus] = useState<ProductionStatus>(defaultStatus);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setClientName("");
-      setOrderNumber("");
-      setArtLink("");
-      setStatus(defaultStatus);
+      setClientName(order?.client_name ?? "");
+      setOrderNumber(order?.order_number ?? "");
+      setArtLink(order?.art_link ?? "");
+      setFabric(order?.fabric ?? "");
+      setColorProfile(order?.color_profile ?? "");
+      setStatus(order?.status ?? defaultStatus);
     }
-  }, [open, defaultStatus]);
+  }, [open, order, defaultStatus]);
 
   async function handleSave() {
     if (!clientName || !orderNumber) {
@@ -481,14 +610,26 @@ function OrderEditor({
     }
     setSaving(true);
     try {
-      const { error } = await supabase.from("production_orders").insert({
+      const payload = {
         client_name: clientName,
         order_number: orderNumber,
         art_link: artLink || null,
+        fabric: fabric || null,
+        color_profile: colorProfile || null,
         status,
-      });
-      if (error) throw error;
-      toast.success("Pedido criado");
+      };
+      if (order) {
+        const { error } = await supabase
+          .from("production_orders")
+          .update(payload)
+          .eq("id", order.id);
+        if (error) throw error;
+        toast.success("Pedido atualizado");
+      } else {
+        const { error } = await supabase.from("production_orders").insert(payload);
+        if (error) throw error;
+        toast.success("Pedido criado");
+      }
       onSaved();
       onOpenChange(false);
     } catch (err: any) {
@@ -500,9 +641,9 @@ function OrderEditor({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Novo Pedido de Produção</DialogTitle>
+          <DialogTitle>{order ? "Editar Pedido" : "Novo Pedido de Produção"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <div>
@@ -528,7 +669,35 @@ function OrderEditor({
             />
           </div>
           <div>
-            <Label>Status Inicial</Label>
+            <Label>Tecido</Label>
+            <Input
+              value={fabric}
+              onChange={(e) => setFabric(e.target.value)}
+              placeholder="Dry Fit, PV, Helanca, Poliéster, Tactel, Algodão…"
+              list="fabric-suggestions"
+            />
+            <datalist id="fabric-suggestions">
+              {FABRIC_SUGGESTIONS.map((s) => (
+                <option key={s} value={s} />
+              ))}
+            </datalist>
+          </div>
+          <div>
+            <Label>Perfil de Cores</Label>
+            <Input
+              value={colorProfile}
+              onChange={(e) => setColorProfile(e.target.value)}
+              placeholder="RGB, CMYK, Pantone, Sublimação…"
+              list="color-suggestions"
+            />
+            <datalist id="color-suggestions">
+              {COLOR_SUGGESTIONS.map((s) => (
+                <option key={s} value={s} />
+              ))}
+            </datalist>
+          </div>
+          <div>
+            <Label>{order ? "Status" : "Status Inicial"}</Label>
             <Select
               value={status}
               onValueChange={(v) => setStatus(v as ProductionStatus)}
@@ -565,26 +734,29 @@ function OrderEditor({
 function OrderDetail({
   order,
   onClose,
+  onEdit,
   onDelete,
 }: {
   order: ProductionOrder | null;
   onClose: () => void;
+  onEdit: (o: ProductionOrder) => void;
   onDelete: (o: ProductionOrder) => void;
 }) {
-  const [history, setHistory] = useState<ProductionHistory[]>([]);
+  const [history, setHistory] = useState<ProductionAuditEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!order) return;
     setLoading(true);
     supabase
-      .from("production_order_history")
-      .select("*")
-      .eq("order_id", order.id)
-      .order("changed_at", { ascending: false })
+      .from("audit_log")
+      .select("id,user_name,action,created_at,details")
+      .eq("module", "Produção")
+      .contains("details", { id: order.id })
+      .order("created_at", { ascending: false })
       .then(({ data, error }) => {
         if (error) toast.error("Erro ao carregar histórico");
-        else setHistory((data ?? []) as ProductionHistory[]);
+        else setHistory((data ?? []) as ProductionAuditEntry[]);
         setLoading(false);
       });
   }, [order]);
@@ -619,6 +791,8 @@ function OrderDetail({
               )
             }
           />
+          <Row label="Tecido" value={order.fabric || <span className="text-muted-foreground">—</span>} />
+          <Row label="Perfil de Cores" value={order.color_profile || <span className="text-muted-foreground">—</span>} />
           <Row
             label="Status Atual"
             value={
@@ -646,6 +820,18 @@ function OrderDetail({
               second: "2-digit",
             })}
           />
+          <Row
+            label="Usuário responsável"
+            value={
+              order.created_by_name ? (
+                <span className="inline-flex items-center gap-1">
+                  <UserIcon className="h-3 w-3" /> {order.created_by_name}
+                </span>
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )
+            }
+          />
 
           <div className="pt-3 border-t border-border">
             <p className="text-xs font-semibold inline-flex items-center gap-1.5 mb-2">
@@ -659,7 +845,7 @@ function OrderDetail({
             )}
             <ul className="space-y-1.5">
               {history.map((h) => {
-                const hd = new Date(h.changed_at);
+                const hd = new Date(h.created_at);
                 return (
                   <li
                     key={h.id}
@@ -673,13 +859,8 @@ function OrderDetail({
                       })}
                     </span>
                     <span className="text-muted-foreground">·</span>
-                    <span>
-                      {h.from_status ? PROD_STATUS_LABELS[h.from_status] : "Criado"}
-                    </span>
-                    <span className="text-muted-foreground">→</span>
-                    <span className="font-medium">
-                      {PROD_STATUS_LABELS[h.to_status]}
-                    </span>
+                    <span className="font-medium">{h.user_name ?? "—"}</span>
+                    <span>{h.action}</span>
                   </li>
                 );
               })}
@@ -697,6 +878,9 @@ function OrderDetail({
           </Button>
           <Button variant="outline" onClick={onClose}>
             Fechar
+          </Button>
+          <Button onClick={() => onEdit(order)}>
+            <Pencil className="h-4 w-4 mr-1" /> Editar
           </Button>
         </DialogFooter>
       </DialogContent>
