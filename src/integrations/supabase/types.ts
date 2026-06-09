@@ -83,7 +83,11 @@ export type Database = {
         Row: {
           art_link: string | null
           client_name: string
+          color_profile: string | null
           created_at: string
+          created_by_id: string | null
+          created_by_name: string | null
+          fabric: string | null
           id: string
           order_number: string
           position: number
@@ -93,7 +97,11 @@ export type Database = {
         Insert: {
           art_link?: string | null
           client_name: string
+          color_profile?: string | null
           created_at?: string
+          created_by_id?: string | null
+          created_by_name?: string | null
+          fabric?: string | null
           id?: string
           order_number: string
           position?: number
@@ -103,7 +111,11 @@ export type Database = {
         Update: {
           art_link?: string | null
           client_name?: string
+          color_profile?: string | null
           created_at?: string
+          created_by_id?: string | null
+          created_by_name?: string | null
+          fabric?: string | null
           id?: string
           order_number?: string
           position?: number
