@@ -89,11 +89,13 @@ function ProductionPage() {
   const [orders, setOrders] = useState<ProductionOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [clientFilter, setClientFilter] = useState("");
-  const [orderFilter, setOrderFilter] = useState("");
-  const [fabricFilter, setFabricFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState(() => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  });
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<ProductionOrder | null>(null);
@@ -136,28 +138,23 @@ function ProductionPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    const c = clientFilter.trim().toLowerCase();
-    const n = orderFilter.trim().toLowerCase();
-    const f = fabricFilter.trim().toLowerCase();
     return orders.filter((o) => {
       if (q) {
         const hit =
           o.client_name.toLowerCase().includes(q) ||
           o.order_number.toLowerCase().includes(q) ||
-          (o.fabric ?? "").toLowerCase().includes(q);
+          (o.fabric ?? "").toLowerCase().includes(q) ||
+          (o.art_link ?? "").toLowerCase().includes(q) ||
+          (o.color_profile ?? "").toLowerCase().includes(q);
         if (!hit) return false;
       }
-      if (statusFilter !== "all" && o.status !== statusFilter) return false;
-      if (c && !o.client_name.toLowerCase().includes(c)) return false;
-      if (n && !o.order_number.toLowerCase().includes(n)) return false;
-      if (f && !(o.fabric ?? "").toLowerCase().includes(f)) return false;
       if (dateFilter) {
         const d = new Date(o.created_at).toISOString().slice(0, 10);
         if (d !== dateFilter) return false;
       }
       return true;
     });
-  }, [orders, search, statusFilter, clientFilter, orderFilter, fabricFilter, dateFilter]);
+  }, [orders, search, dateFilter]);
 
   const byStatus = useMemo(() => {
     const m: Record<ProductionStatus, ProductionOrder[]> = {
@@ -215,14 +212,13 @@ function ProductionPage() {
     setDeleteTarget(null);
   }
 
-  const hasFilters =
-    !!search || !!dateFilter || statusFilter !== "all" || !!clientFilter || !!orderFilter || !!fabricFilter;
+  const hasFilters = !!search || !!dateFilter;
 
   return (
     <div className="flex flex-col h-screen">
       <Toaster richColors position="top-right" />
 
-      <header className="border-b border-border bg-card/80 backdrop-blur px-4 sm:px-6 py-3 space-y-2">
+      <header className="border-b border-border bg-card/80 backdrop-blur px-4 sm:px-6 py-3">
         <div className="flex flex-wrap items-center gap-3">
           <div>
             <h1 className="text-base font-bold leading-tight">Controle de Produção</h1>
@@ -232,76 +228,41 @@ function ProductionPage() {
           </div>
 
           <div className="flex-1 flex flex-wrap items-center gap-2 sm:justify-end">
-            <div className="relative flex-1 sm:max-w-xs min-w-[180px]">
+            <div className="relative flex-1 sm:max-w-sm min-w-[200px]">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar cliente, pedido ou tecido…"
+                placeholder="Pesquisar cliente, pedido, tecido, arte ou perfil de cores…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-8 h-9"
               />
             </div>
+            <Input
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="h-9 w-[160px]"
+            />
+            {hasFilters && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9"
+                onClick={() => {
+                  setSearch("");
+                  setDateFilter("");
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
             <Button onClick={() => openNew("molde")} className="h-9">
               <Plus className="h-4 w-4 mr-1" /> Adicionar Pedido
             </Button>
           </div>
         </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-            <SelectTrigger className="h-8 w-[140px] text-xs">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos status</SelectItem>
-              {PROD_STATUS_ORDER.map((s) => (
-                <SelectItem key={s} value={s}>{PROD_STATUS_LABELS[s]}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Input
-            placeholder="Cliente"
-            value={clientFilter}
-            onChange={(e) => setClientFilter(e.target.value)}
-            className="h-8 w-[140px] text-xs"
-          />
-          <Input
-            placeholder="Nº pedido"
-            value={orderFilter}
-            onChange={(e) => setOrderFilter(e.target.value)}
-            className="h-8 w-[120px] text-xs"
-          />
-          <Input
-            placeholder="Tecido"
-            value={fabricFilter}
-            onChange={(e) => setFabricFilter(e.target.value)}
-            className="h-8 w-[120px] text-xs"
-          />
-          <Input
-            type="date"
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="h-8 w-[150px] text-xs"
-          />
-          {hasFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8"
-              onClick={() => {
-                setSearch("");
-                setDateFilter("");
-                setStatusFilter("all");
-                setClientFilter("");
-                setOrderFilter("");
-                setFabricFilter("");
-              }}
-            >
-              <X className="h-3 w-3 mr-1" /> Limpar
-            </Button>
-          )}
-        </div>
       </header>
+
 
       <main className="flex-1 overflow-x-auto overflow-y-hidden p-4">
         <DndContext sensors={sensors} onDragEnd={handleDragEnd}>

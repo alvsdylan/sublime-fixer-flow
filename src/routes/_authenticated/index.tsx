@@ -27,7 +27,13 @@ function KanbanPage() {
   const [cards, setCards] = useState<RepairCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState(() => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  });
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<RepairCard | null>(null);
   const [newStatus, setNewStatus] = useState<RepairStatus>("todo");
