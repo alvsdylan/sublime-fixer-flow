@@ -138,28 +138,23 @@ function ProductionPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    const c = clientFilter.trim().toLowerCase();
-    const n = orderFilter.trim().toLowerCase();
-    const f = fabricFilter.trim().toLowerCase();
     return orders.filter((o) => {
       if (q) {
         const hit =
           o.client_name.toLowerCase().includes(q) ||
           o.order_number.toLowerCase().includes(q) ||
-          (o.fabric ?? "").toLowerCase().includes(q);
+          (o.fabric ?? "").toLowerCase().includes(q) ||
+          (o.art_link ?? "").toLowerCase().includes(q) ||
+          (o.color_profile ?? "").toLowerCase().includes(q);
         if (!hit) return false;
       }
-      if (statusFilter !== "all" && o.status !== statusFilter) return false;
-      if (c && !o.client_name.toLowerCase().includes(c)) return false;
-      if (n && !o.order_number.toLowerCase().includes(n)) return false;
-      if (f && !(o.fabric ?? "").toLowerCase().includes(f)) return false;
       if (dateFilter) {
         const d = new Date(o.created_at).toISOString().slice(0, 10);
         if (d !== dateFilter) return false;
       }
       return true;
     });
-  }, [orders, search, statusFilter, clientFilter, orderFilter, fabricFilter, dateFilter]);
+  }, [orders, search, dateFilter]);
 
   const byStatus = useMemo(() => {
     const m: Record<ProductionStatus, ProductionOrder[]> = {
