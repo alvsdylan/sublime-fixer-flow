@@ -2,7 +2,7 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
   tanstackStart: {
-    server: { entry: "server" },
+    // Removido o server entry customizado — deixa o Nitro/Vercel gerenciar
   },
   vite: {
     // @ts-ignore
