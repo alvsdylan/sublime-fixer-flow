@@ -1,13 +1,14 @@
-import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
+import tailwindcss from "@tailwindcss/vite";
+import tsConfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  tanstackStart: {
-    // Removido o server entry customizado — deixa o Nitro/Vercel gerenciar
-  },
-  vite: {
-    // @ts-ignore
-    nitro: {
-      preset: "vercel",
-    },
-  },
+  plugins: [
+    TanStackRouterVite({ routesDirectory: "./src/routes" }),
+    react(),
+    tailwindcss(),
+    tsConfigPaths(),
+  ],
 });
