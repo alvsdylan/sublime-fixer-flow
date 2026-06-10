@@ -22,7 +22,7 @@ function AuthPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!loading && session) navigate({ to: "/", replace: true });
+    if (!loading && session) navigate({ to: "/_authenticated", replace: true });
   }, [loading, session, navigate]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -36,7 +36,7 @@ function AuthPage() {
       }
       await logAudit("Autenticação", "login");
       toast.success("Bem-vindo!");
-      navigate({ to: "/", replace: true });
+      navigate({ to: "/_authenticated", replace: true });
     } finally {
       setSubmitting(false);
     }
