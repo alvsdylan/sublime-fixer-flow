@@ -44,7 +44,10 @@ function AuthenticatedLayout() {
   return (
     <div className="flex h-screen w-full">
       <AppSidebar />
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0 flex flex-col relative">
+        <div className="absolute top-2 right-3 z-50">
+          <NotificationsBell />
+        </div>
         <Outlet />
       </div>
     </div>
