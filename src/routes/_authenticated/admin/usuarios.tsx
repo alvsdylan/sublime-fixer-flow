@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import {
   Plus,
   Pencil,
@@ -75,10 +74,10 @@ function UsersPage() {
   const [resetTarget, setResetTarget] = useState<ProfileRow | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ProfileRow | null>(null);
 
-  const createFn = useServerFn(createUser);
-  const updateFn = useServerFn(updateUser);
-  const resetFn = useServerFn(resetUserPassword);
-  const deleteFn = useServerFn(deleteUser);
+  const createFn = createUser;
+  const updateFn = updateUser;
+  const resetFn = resetUserPassword;
+  const deleteFn = deleteUser;
 
   useEffect(() => {
     if (!authLoading && !isAdmin) navigate({ to: "/", replace: true });
