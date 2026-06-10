@@ -13,6 +13,7 @@ export function AppSidebar() {
   ];
 
   const adminItems = [
+    { to: "/admin/relatorios-consertos", label: "Relatórios de Consertos", icon: BarChart3 },
     { to: "/admin/historico", label: "Histórico do Sistema", icon: History },
     { to: "/admin/usuarios", label: "Usuários", icon: Users },
   ];
