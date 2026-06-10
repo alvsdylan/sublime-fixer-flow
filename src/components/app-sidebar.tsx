@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Wrench, Factory, Users, History, LogOut, Shield } from "lucide-react";
+import { Wrench, Factory, Users, History, LogOut, Shield, BarChart3 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 
