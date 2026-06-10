@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedProducaoRouteImport } from './routes/_authenticated/producao'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
+import { Route as AuthenticatedAdminRelatoriosConsertosRouteImport } from './routes/_authenticated/admin/relatorios-consertos'
 import { Route as AuthenticatedAdminHistoricoRouteImport } from './routes/_authenticated/admin/historico'
 
 const AuthRoute = AuthRouteImport.update({
@@ -41,6 +42,12 @@ const AuthenticatedAdminUsuariosRoute =
     path: '/admin/usuarios',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminRelatoriosConsertosRoute =
+  AuthenticatedAdminRelatoriosConsertosRouteImport.update({
+    id: '/admin/relatorios-consertos',
+    path: '/admin/relatorios-consertos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminHistoricoRoute =
   AuthenticatedAdminHistoricoRouteImport.update({
     id: '/admin/historico',
@@ -53,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/producao': typeof AuthenticatedProducaoRoute
   '/admin/historico': typeof AuthenticatedAdminHistoricoRoute
+  '/admin/relatorios-consertos': typeof AuthenticatedAdminRelatoriosConsertosRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
 }
 export interface FileRoutesByTo {
@@ -60,6 +68,7 @@ export interface FileRoutesByTo {
   '/producao': typeof AuthenticatedProducaoRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/historico': typeof AuthenticatedAdminHistoricoRoute
+  '/admin/relatorios-consertos': typeof AuthenticatedAdminRelatoriosConsertosRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
 }
 export interface FileRoutesById {
@@ -69,6 +78,7 @@ export interface FileRoutesById {
   '/_authenticated/producao': typeof AuthenticatedProducaoRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/historico': typeof AuthenticatedAdminHistoricoRoute
+  '/_authenticated/admin/relatorios-consertos': typeof AuthenticatedAdminRelatoriosConsertosRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
 }
 export interface FileRouteTypes {
@@ -78,9 +88,16 @@ export interface FileRouteTypes {
     | '/auth'
     | '/producao'
     | '/admin/historico'
+    | '/admin/relatorios-consertos'
     | '/admin/usuarios'
   fileRoutesByTo: FileRoutesByTo
-  to: '/auth' | '/producao' | '/' | '/admin/historico' | '/admin/usuarios'
+  to:
+    | '/auth'
+    | '/producao'
+    | '/'
+    | '/admin/historico'
+    | '/admin/relatorios-consertos'
+    | '/admin/usuarios'
   id:
     | '__root__'
     | '/_authenticated'
@@ -88,6 +105,7 @@ export interface FileRouteTypes {
     | '/_authenticated/producao'
     | '/_authenticated/'
     | '/_authenticated/admin/historico'
+    | '/_authenticated/admin/relatorios-consertos'
     | '/_authenticated/admin/usuarios'
   fileRoutesById: FileRoutesById
 }
@@ -133,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsuariosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/relatorios-consertos': {
+      id: '/_authenticated/admin/relatorios-consertos'
+      path: '/admin/relatorios-consertos'
+      fullPath: '/admin/relatorios-consertos'
+      preLoaderRoute: typeof AuthenticatedAdminRelatoriosConsertosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/historico': {
       id: '/_authenticated/admin/historico'
       path: '/admin/historico'
@@ -147,6 +172,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProducaoRoute: typeof AuthenticatedProducaoRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAdminHistoricoRoute: typeof AuthenticatedAdminHistoricoRoute
+  AuthenticatedAdminRelatoriosConsertosRoute: typeof AuthenticatedAdminRelatoriosConsertosRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
 }
 
@@ -154,6 +180,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProducaoRoute: AuthenticatedProducaoRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAdminHistoricoRoute: AuthenticatedAdminHistoricoRoute,
+  AuthenticatedAdminRelatoriosConsertosRoute:
+    AuthenticatedAdminRelatoriosConsertosRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
 }
 

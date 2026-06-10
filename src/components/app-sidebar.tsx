@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Wrench, Factory, Users, History, LogOut, Shield } from "lucide-react";
+import { Wrench, Factory, Users, History, LogOut, Shield, BarChart3 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 
@@ -13,6 +13,7 @@ export function AppSidebar() {
   ];
 
   const adminItems = [
+    { to: "/admin/relatorios-consertos", label: "Relatórios de Consertos", icon: BarChart3 },
     { to: "/admin/historico", label: "Histórico do Sistema", icon: History },
     { to: "/admin/usuarios", label: "Usuários", icon: Users },
   ];
