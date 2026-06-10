@@ -1,16 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
-  Link,
   createRootRouteWithContext,
-  useRouter,
 } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "../lib/auth-context";
 import "../styles.css";
-
-// mantenha NotFoundComponent e ErrorComponent iguais...
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   component: RootComponent,
@@ -26,5 +20,24 @@ function RootComponent() {
         <Outlet />
       </AuthProvider>
     </QueryClientProvider>
+  );
+}
+
+function NotFoundComponent() {
+  return (
+    <div className="flex flex-col items-center justify-center h-screen gap-4">
+      <h1 className="text-2xl font-bold">Página não encontrada</h1>
+      <a href="/" className="text-primary underline">Voltar ao início</a>
+    </div>
+  );
+}
+
+function ErrorComponent({ error }: { error: Error }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-screen gap-4">
+      <h1 className="text-2xl font-bold text-destructive">Erro inesperado</h1>
+      <p className="text-muted-foreground">{error?.message}</p>
+      <a href="/" className="text-primary underline">Voltar ao início</a>
+    </div>
   );
 }
