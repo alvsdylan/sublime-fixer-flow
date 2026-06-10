@@ -47,6 +47,50 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          attendant_name: string | null
+          card_id: string | null
+          client_name: string
+          created_at: string
+          id: string
+          order_number: string
+          read_at: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          attendant_name?: string | null
+          card_id?: string | null
+          client_name: string
+          created_at?: string
+          id?: string
+          order_number: string
+          read_at?: string | null
+          type?: string
+          user_id: string
+        }
+        Update: {
+          attendant_name?: string | null
+          card_id?: string | null
+          client_name?: string
+          created_at?: string
+          id?: string
+          order_number?: string
+          read_at?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "repair_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_order_history: {
         Row: {
           changed_at: string
