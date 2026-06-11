@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Loader2 } from "lucide-react";
 import { AppSidebar } from "@/components/app-sidebar";
-import { NotificationsBell } from "@/components/notifications-bell";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -45,9 +44,6 @@ function AuthenticatedLayout() {
     <div className="flex h-screen w-full">
       <AppSidebar />
       <div className="flex-1 min-w-0 flex flex-col relative">
-        <div className="absolute top-2 right-3 z-50">
-          <NotificationsBell />
-        </div>
         <Outlet />
       </div>
     </div>
