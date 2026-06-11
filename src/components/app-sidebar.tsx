@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Wrench, Factory, Users, History, LogOut, Shield, BarChart3 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
+import { NotificationsBell } from "@/components/notifications-bell";
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -51,6 +52,12 @@ export function AppSidebar() {
       </nav>
 
       <div className="border-t border-border p-2 space-y-1">
+        {isAdmin && (
+          <div className="flex items-center gap-2 px-1 lg:px-2.5 py-1">
+            <NotificationsBell />
+            <span className="hidden lg:inline text-xs text-muted-foreground truncate">Notificações</span>
+          </div>
+        )}
         <div className="hidden lg:block px-2.5 py-1">
           <p className="text-xs font-medium truncate">{profile?.name || profile?.username || "—"}</p>
           <p className="text-[10px] text-muted-foreground truncate">
