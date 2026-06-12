@@ -61,7 +61,7 @@ export function NotificationsBell() {
   useEffect(() => {
     if (!isAdmin || !user) return;
     const ch = supabase
-      .channel("notifications_rt_" + user.id)
+      .channel(`notifications_rt_${user.id}_${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         {
