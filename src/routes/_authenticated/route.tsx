@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Loader2 } from "lucide-react";
 import { AppSidebar } from "@/components/app-sidebar";
+import { MobileHeader } from "@/components/mobile-header";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -44,7 +45,10 @@ function AuthenticatedLayout() {
     <div className="flex h-screen w-full">
       <AppSidebar />
       <div className="flex-1 min-w-0 flex flex-col relative">
-        <Outlet />
+        <MobileHeader />
+        <div className="flex-1 min-h-0 flex flex-col">
+          <Outlet />
+        </div>
       </div>
     </div>
   );
