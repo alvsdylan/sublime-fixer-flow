@@ -4,23 +4,23 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { NotificationsBell } from "@/components/notifications-bell";
 
+export const MAIN_NAV_ITEMS = [
+  { to: "/", label: "Controle de Consertos", icon: Wrench, exact: true },
+  { to: "/producao", label: "Controle de Produção", icon: Factory, exact: true },
+] as const;
+
+export const ADMIN_NAV_ITEMS = [
+  { to: "/admin/relatorios-consertos", label: "Relatórios de Consertos", icon: BarChart3 },
+  { to: "/admin/historico", label: "Histórico do Sistema", icon: History },
+  { to: "/admin/usuarios", label: "Usuários", icon: Users },
+] as const;
+
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { profile, isAdmin, signOut } = useAuth();
 
-  const mainItems = [
-    { to: "/", label: "Controle de Consertos", icon: Wrench, exact: true },
-    { to: "/producao", label: "Controle de Produção", icon: Factory, exact: true },
-  ];
-
-  const adminItems = [
-    { to: "/admin/relatorios-consertos", label: "Relatórios de Consertos", icon: BarChart3 },
-    { to: "/admin/historico", label: "Histórico do Sistema", icon: History },
-    { to: "/admin/usuarios", label: "Usuários", icon: Users },
-  ];
-
   return (
-    <aside className="hidden sm:flex flex-col w-[60px] lg:w-[230px] bg-card border-r border-border shrink-0">
+    <aside className="hidden md:flex flex-col w-[60px] lg:w-[230px] bg-card border-r border-border shrink-0">
       <div className="px-3 py-3 border-b border-border flex items-center gap-2">
         <div className="h-9 w-9 rounded-lg bg-primary text-primary-foreground grid place-items-center font-bold shrink-0">
           S
@@ -32,7 +32,7 @@ export function AppSidebar() {
       </div>
 
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-        {mainItems.map((it) => {
+        {MAIN_NAV_ITEMS.map((it) => {
           const active = it.exact ? pathname === it.to : pathname.startsWith(it.to);
           return <NavLink key={it.to} {...it} active={active} />;
         })}
@@ -43,7 +43,7 @@ export function AppSidebar() {
               <Shield className="h-3 w-3" /> Administração
             </div>
             <div className="lg:hidden border-t border-border my-2" />
-            {adminItems.map((it) => {
+            {ADMIN_NAV_ITEMS.map((it) => {
               const active = pathname.startsWith(it.to);
               return <NavLink key={it.to} {...it} active={active} />;
             })}
